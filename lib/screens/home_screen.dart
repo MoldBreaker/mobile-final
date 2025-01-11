@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:job_finder/screens/job_details_screen.dart';
 import 'package:job_finder/screens/splash_screen.dart';
 import 'package:job_finder/theme/colors.dart';
 import 'package:job_finder/theme/images.dart';
@@ -18,7 +19,13 @@ class HomeScreen extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(right: 10),
       child: GestureDetector(
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => jobDetailScreen(),
+              ));
+        },
         child: Container(
           padding: EdgeInsets.all(16),
           width: MediaQuery.of(context).size.width / 2,
@@ -85,7 +92,13 @@ class HomeScreen extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(right: 10),
       child: GestureDetector(
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => jobDetailScreen(),
+              ));
+        },
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           margin: EdgeInsets.symmetric(vertical: 6),
