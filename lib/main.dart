@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:job_finder/screens/splash_screen.dart';
+import 'package:job_finder/screens/login_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -15,7 +15,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: "TKV Jobs",
-      home: SplashScreen(),
+      home: LoginPage(),
     );
   }
 }
