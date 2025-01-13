@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:job_finder/components/button.dart';
 import 'package:job_finder/components/my_textfield.dart';
 import 'package:job_finder/components/square_tile.dart';
+import 'package:job_finder/screens/main_screen.dart';
 import 'package:job_finder/screens/register_screen.dart';
 import 'package:job_finder/screens/splash_screen.dart';
 
@@ -16,7 +17,7 @@ class LoginPage extends StatelessWidget {
   void signUserIn(context) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => SplashScreen()),
+      MaterialPageRoute(builder: (context) => MainScreen()),
     );
   }
 
