@@ -6,18 +6,48 @@ import 'package:job_finder/components/my_textfield.dart';
 import 'package:job_finder/components/square_tile.dart';
 import 'package:job_finder/screens/register_screen.dart';
 import 'package:job_finder/screens/splash_screen.dart';
+import 'package:job_finder/services/auth_service.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
 
-  final usernameController = TextEditingController();
+  final authService = AuthService();
+  final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void signUserIn(context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => SplashScreen()),
+  void signUserIn(BuildContext context, String email, String password) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
+
+    final result = await authService.login(email, password);
+
+    //final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (result['success']) {
+      Navigator.pop(context);
+      //prefs.setString("token", result['data']['token']);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SplashScreen()),
+      );
+    } else {
+      Navigator.pop(context);
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Login Failed"),
+          content: Text(result['message'] ?? "An error occurred"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
@@ -52,7 +82,7 @@ class LoginPage extends StatelessWidget {
 
               // username textfield
               MyTextField(
-                controller: usernameController,
+                controller: emailController,
                 hintText: 'Username',
                 obscureText: false,
               ),
@@ -86,7 +116,13 @@ class LoginPage extends StatelessWidget {
 
               // sign in button
               MyButton(
-                onTap: () => signUserIn(context),
+                onTap: () {
+                  {
+                    final email = emailController.text;
+                    final password = passwordController.text;
+                    signUserIn(context, email, password);
+                  }
+                },
                 text: "Sign In",
               ),
 
