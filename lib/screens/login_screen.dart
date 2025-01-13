@@ -7,6 +7,7 @@ import 'package:job_finder/components/square_tile.dart';
 import 'package:job_finder/screens/main_screen.dart';
 import 'package:job_finder/screens/register_screen.dart';
 import 'package:job_finder/services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -24,10 +25,10 @@ class LoginPage extends StatelessWidget {
 
     final result = await authService.login(email, password);
 
-    //final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (result['success']) {
       Navigator.pop(context);
-      //prefs.setString("token", result['data']['token']);
+      prefs.setString("token", result['data']['token']);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => MainScreen()),

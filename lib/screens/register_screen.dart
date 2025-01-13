@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:job_finder/components/button.dart';
 import 'package:job_finder/components/my_textfield.dart';
 import 'package:job_finder/screens/login_screen.dart';
+import 'package:job_finder/services/auth_service.dart';
 
 class RegisterPage extends StatelessWidget {
   RegisterPage({super.key});
@@ -12,9 +13,57 @@ class RegisterPage extends StatelessWidget {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   final emailController = TextEditingController();
+  final AuthService authService = AuthService();
 
   // sign user in method
-  void signUserIn() {}
+  void signUserUp(BuildContext context, String email, String password,
+      String userName) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final result = await authService.register(email, password, userName);
+
+    if (result['success']) {
+      Navigator.pop(context);
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Singn up Successfully"),
+          content: Text(
+              "Registered successfully. Please check your email to confirm."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                );
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+    } else {
+      Navigator.pop(context);
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Singn up Failed"),
+          content: Text(result['message'] ?? "An error occurred"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +123,12 @@ class RegisterPage extends StatelessWidget {
 
               // sign in button
               MyButton(
-                onTap: signUserIn,
+                onTap: () {
+                  final email = emailController.text;
+                  final password = passwordController.text;
+                  final userName = usernameController.text;
+                  signUserUp(context, email, password, userName);
+                },
                 text: "Sign Up",
               ),
 

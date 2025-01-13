@@ -39,7 +39,7 @@ class AuthService {
   /// Register function
   Future<Map<String, dynamic>> register(
       String email, String password, String name) async {
-    final url = Uri.parse('$BASE_URL/register');
+    final url = Uri.parse('$BASE_URL/api/Auth/register');
     try {
       final response = await http.post(
         url,
@@ -47,20 +47,14 @@ class AuthService {
         body: json.encode({
           'email': email,
           'password': password,
-          'name': name,
+          'userName': name,
         }),
       );
 
-      if (response.statusCode == 201) {
-        return {
-          'success': true,
-          'data': json.decode(response.body),
-        };
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': response.body};
       } else {
-        return {
-          'success': false,
-          'message': json.decode(response.body)['message'],
-        };
+        return {'success': false, 'message': response.body};
       }
     } catch (e) {
       return {
