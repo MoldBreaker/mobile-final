@@ -1,13 +1,22 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:job_finder/models/job.dart';
 import 'package:job_finder/screens/job_details_screen.dart';
-import 'package:job_finder/screens/splash_screen.dart';
+import 'package:job_finder/services/job_service.dart';
 import 'package:job_finder/theme/colors.dart';
 import 'package:job_finder/theme/images.dart';
 
-class HomeScreen extends StatelessWidget {
-  // const HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final JobService jobService = JobService();
+  final TextEditingController searchController = TextEditingController();
+  String searchQuery = "";
+
   Widget _recommendJobs(
     BuildContext context, {
     required String img,
@@ -75,76 +84,6 @@ class HomeScreen extends StatelessWidget {
                   color: isActive ? Colors.white38 : colors.subtitle,
                 ),
               )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _jobCard(
-    BuildContext context, {
-    required String img,
-    required String title,
-    required String subtitle,
-    required String salary,
-  }) {
-    return Padding(
-      padding: EdgeInsets.only(right: 10),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => jobDetailScreen(),
-              ));
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          margin: EdgeInsets.symmetric(vertical: 6),
-          decoration: BoxDecoration(
-              color: colors.lightGrey.withOpacity(0.8),
-              borderRadius: BorderRadius.circular(10)),
-          child: Row(
-            children: [
-              Container(
-                height: 50,
-                width: 50,
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: colors.lightGrey,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Image.asset(img),
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(fontSize: 14, color: colors.subtitle),
-                  ),
-                  SizedBox(
-                    height: 5,
-                  ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: colors.title,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              Spacer(),
-              Text(
-                salary,
-                style: TextStyle(fontSize: 15, color: colors.title),
-              ),
             ],
           ),
         ),
@@ -235,10 +174,16 @@ class HomeScreen extends StatelessWidget {
                         color: colors.lightGrey.withOpacity(0.8),
                         borderRadius: BorderRadius.circular(10)),
                     child: TextField(
+                      controller: searchController,
                       decoration: InputDecoration(
                         hintText: "What are you looking for?",
                         border: InputBorder.none,
                       ),
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value.toLowerCase();
+                        });
+                      },
                     ),
                   )),
                   SizedBox(
@@ -257,94 +202,43 @@ class HomeScreen extends StatelessWidget {
                   )
                 ],
               ),
-              Container(
-                margin: EdgeInsets.symmetric(
-                  vertical: 12,
-                ),
-                height: 220,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Recommend Jobs",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colors.title,
-                          fontSize: 18),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Expanded(
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          _recommendJobs(
-                            context,
-                            img: Images.google,
-                            company: "Google",
-                            title: "App Developer",
-                            sub: "\$45,500 Onsite",
-                            isActive: true,
-                          ),
-                          _recommendJobs(
-                            context,
-                            img: Images.dropbox,
-                            company: "Dropbox",
-                            title: "Web Developer",
-                            sub: "\$65,500 Remote",
-                            isActive: false,
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
               SizedBox(
-                height: 10,
+                height: 20,
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Recently Added",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: colors.title,
-                      fontSize: 18,
-                    ),
-                  ),
-                  _jobCard(
-                    context,
-                    img: Images.gitlab,
-                    title: "Gitlab",
-                    subtitle: "UX Developer",
-                    salary: "\$75.800",
-                  ),
-                  _jobCard(
-                    context,
-                    img: Images.bitbucket,
-                    title: "Bitbucket",
-                    subtitle: "App Developer",
-                    salary: "\$45.800",
-                  ),
-                  _jobCard(
-                    context,
-                    img: Images.slack,
-                    title: "Slack",
-                    subtitle: "Web Developer",
-                    salary: "\$85.800",
-                  ),
-                  _jobCard(
-                    context,
-                    img: Images.dropbox,
-                    title: "Dropbox",
-                    subtitle: "Ai Engineer",
-                    salary: "\$95.800",
-                  ),
-                ],
-              )
+              FutureBuilder<List<Job>>(
+                future: jobService.fetchAllJobs(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (snapshot.hasData) {
+                    final jobs = snapshot.data!
+                        .where((job) =>
+                            job.jobName?.toLowerCase().contains(searchQuery) ??
+                            false)
+                        .toList();
+
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: jobs.length,
+                      itemBuilder: (context, index) {
+                        final job = jobs[index];
+                        return _recommendJobs(
+                          context,
+                          img: Images.google,
+                          company: job.company?.companyName ?? 'Unknown',
+                          title: job.jobName ?? 'No Title',
+                          sub: job.salary ?? 'Negotiable',
+                        );
+                      },
+                    );
+                  } else {
+                    return Center(child: Text('No jobs found.'));
+                  }
+                },
+              ),
             ],
           ),
         ),

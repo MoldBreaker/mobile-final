@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:job_finder/theme/constants.dart';
 
 class AuthService {
-  /// Login function
   Future<Map<String, dynamic>> login(String email, String password) async {
     final url = Uri.parse('$BASE_URL/api/Auth/login');
     try {
